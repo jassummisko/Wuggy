@@ -1,0 +1,10 @@
+import selfTagCommands from require "./commands/selfTag"
+import getTagCommands from require "./commands/getTags"
+import debugCommands from require "./commands/debug"
+
+export COMMANDS = {}
+register = (tab) -> table.insert COMMANDS, cmd for cmd in *tab
+
+register selfTagCommands
+register getTagCommands
+register debugCommands

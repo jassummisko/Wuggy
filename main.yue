@@ -1,0 +1,28 @@
+_G.require = require
+_G[k] = v for k,v in pairs require "./utils/std_func"
+import "discordia" as disc
+import COMMANDS from require "./commands/registry"
+import config from require './config'
+  
+token = ([line for line in io.lines ".token"])[1]
+client = disc.Client {cacheAllMembers: true}
+trigger = config.triggerChar
+
+client\on "ready", ->
+    print "OK"
+
+client\on "messageCreate", (message) ->
+    return unless message?
+    return if message.author.bot
+
+    for cmd in *COMMANDS
+        return unless message.content? 
+        return unless cmd?
+        try
+            if (head words message.content)\upper! == (trigger..cmd.name)\upper!
+                cmd.func message
+        catch err
+            print yue.traceback err
+
+client\enableAllIntents!
+client\run "Bot #{token}" 

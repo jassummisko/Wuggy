@@ -1,0 +1,97 @@
+export selfTagCommands = {}
+strutils = require "./utils/strutils"
+import Command from require "./commands/base"
+import getRoleByName, addRoleByName from require "./utils/botutils"
+import quotes from require "./data/quotes"
+import ERRORS, TAGCOLORS from require "./globals"
+import config from require "./config"
+import triggerChar from config
+
+add = (c) -> table.insert selfTagCommands, c
+
+export addRoleCommandTemplate = (message, roleType, requestedRoles) ->
+    user = message.member
+    guild = message.guild
+    for requestedRole in *requestedRoles
+        roleName, roleAdded, err = addRoleByName user, "#{roleType} #{requestedRole}"
+        print roleName, roleAdded, err
+
+        if roleAdded
+            message\reply quotes.roleGiven user.name, roleName
+        
+        if err == ERRORS.MemberHasRole
+            message\reply quotes.errors.userAlreadyHasRole user.name, roleName
+
+        if err == ERRORS.RoleNotFound
+            if roleType\upper! == 'LEARNING'
+                roleName, roleAdded, err = addRoleByName user, "Learning other"
+            else
+                for role in guild.roles\findAll (x)->x.color==TAGCOLORS.Native
+                    if role.name\upper! == requestedRole\upper!
+                        roleName, roleAdded, err = addRoleByName user, "#{requestedRole}"
+                        break
+
+            if not roleAdded
+                switch err
+                    when ERRORS.RoleNotFound
+                        message\reply quotes.errors.roleNotFound "#{roleType} #{requestedRole}"
+                        return false
+                    when ERRORS.MemberHasRole
+                        message\reply quotes.errors.userAlreadyHasRole user.name, roleName
+                        return false
+                    else
+                        message\reply quotes.errors.genericRoleError!
+                        return false
+            else
+                message\reply quotes.mergedRoleGiven user.name, roleName, requestedRole, roleType
+                return true
+
+
+add Command "native", (message) ->
+    w = join tail words (split message.content, "\n")[1]
+        |> split "," 
+        |> map strutils.trim
+    if #w < 1
+        message\reply "Usage: #{triggerChar}native <LANGUAGE>"
+        return false
+    addRoleCommandTemplate message, "Native", w
+
+add Command "fluent", (message) ->
+    w = join tail words (split message.content, "\n")[1]
+        |> split ","
+        |> map strutils.trim
+    if #w < 1
+        message\reply "Usage: #{triggerChar}fluent <LANGUAGE>"
+        return false
+    for role in message.member.roles\iter!
+        if role.color == TAGCOLORS.Native
+            addRoleCommandTemplate message, "Fluent", w
+            return true
+    message\reply "Please state your native language first."
+
+add Command "learning", (message) ->
+    w = join tail words (split message.content, "\n")[1]
+        |> split "," 
+        |> map strutils.trim
+    if #w < 1
+        message\reply "Usage: #{triggerChar}learning <LANGUAGE>"
+        return false
+    for role in message.member.roles\iter!
+        if role.color == TAGCOLORS.Native
+            addRoleCommandTemplate message, "Learning", w
+            return true
+    message\reply "Please state your native language first."
+
+add Command "not", (message) ->
+    w = tail words (split message.content, "\n")[1]
+    if #w < 1
+        message\reply "Usage: #{triggerChar}not <TAG>"
+        return false 
+    tagName = join w
+    user = message.member
+    role = getRoleByName message.member, tagName 
+    if role
+        user\removeRole role.id
+        message\reply quotes.roleRemoved role.name, user.name
+        return
+    message\reply quotes.errors.userDoesntHaveRole user.name, tagName 

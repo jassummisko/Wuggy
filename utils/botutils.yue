@@ -1,0 +1,18 @@
+import ERRORS from require "./globals"
+
+export getUserByPing = (guild, ping) ->
+    guild\getMember ping\sub(3,#ping-1) --- remove "<@...>"
+
+export getRoleByName = (guild, tag) -> 
+    return r, true for r in guild.roles\iter! when r.name\upper! == tag\upper!
+    return nil, ERRORS.RoleNotFound
+
+export addRoleByName = (member, requestedRole) -> --- Returns roleName, isRoleAdded, error
+    role = getRoleByName member.guild, requestedRole
+    return nil, false, ERRORS.RoleNotFound if not role
+    for memberRole in member.roles\iter!
+        if role.name\upper! == memberRole.name\upper!
+            return role.name, false, ERRORS.MemberHasRole
+    return role.name, member\addRole(role.id), nil
+
+export getArgs = (message) -> tail words (split message.content, "\n")[1]

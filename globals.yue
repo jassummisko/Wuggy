@@ -1,0 +1,8 @@
+export ERRORS = {
+    MemberHasRole: 0
+    RoleNotFound: 1
+}
+
+export TAGCOLORS = {
+    Native: 28859
+}

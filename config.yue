@@ -1,0 +1,2 @@
+import "dkjson" as json
+export config = json.decode (io.open "data/config.json", rb)\read("*a")

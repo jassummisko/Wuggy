@@ -1,0 +1,26 @@
+import Command from require "./commands/base"
+import getUserByPing, getArgs from require "./utils/botutils"
+import TAGCOLORS from require "./globals"
+
+export debugCommands = {}
+
+add = (c) -> table.insert debugCommands, c
+
+add Command "getInfo", (message) ->
+    w = join getArgs message
+    member = getUserByPing message.guild, w
+    message\reply {
+       embed: {
+            title: "Information on user #{member.tag}"
+            image: {url: member.avatarURL}
+            fields: {
+                {name: "Date joined", value: member.joinedAt, inline: true}
+            }
+        } 
+    }
+
+add Command "echo", (message) ->
+    print message.content
+
+add Command "hi", (message) ->
+    message\reply "CHEEP CHEEP !! ^- ^"

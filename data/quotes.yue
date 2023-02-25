@@ -1,0 +1,24 @@
+export quotes = {}
+
+quotes.roleRemoved = (role, name) ->
+    "Role '#{role}' removed from user #{name}"
+
+quotes.roleGiven = (username, roleName) ->
+    "User #{username} has been given the role '#{roleName}'"
+
+quotes.mergedRoleGiven = (username, grantedRole, requestedRole, roleType) ->
+    "User #{username} has been granted '#{grantedRole}', as '#{roleType} #{requestedRole}' is not yet present on this server."
+
+quotes.errors = {}
+
+quotes.errors.userDoesntHaveRole = (user, tagName) ->
+    "User #{user} does not have role '#{tagName}'"
+
+quotes.errors.userAlreadyHasRole = (username, roleName) ->
+    "User #{username} already has the role '#{roleName}'"
+
+quotes.errors.roleNotFound = (requestedRole) ->
+    "Role '#{requestedRole}' is not present on the server"
+
+quotes.errors.genericRoleError = ->
+    "Role could not be added"

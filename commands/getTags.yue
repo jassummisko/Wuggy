@@ -1,0 +1,81 @@
+import getRoleByName, getArgs from require './utils/botutils'
+strutils = require './utils/strutils'
+import Command from require "./commands/base"
+import ERRORS, TAGCOLORS from require "./globals"
+
+export getTagCommands = {}
+
+add = (c) -> table.insert getTagCommands, c
+
+add Command "nativeRoles", (message) ->
+    allRoles = {}
+    roleStr = ""
+    for role in message.guild.roles\iter!
+        roleName = words(role.name)[#(words role.name)]
+        table.insert allRoles, roleName if (words role.name)[1] == "Native" or (role.color == TAGCOLORS.Native)
+    allRoles = sorted allRoles
+    for i, role in ipairs allRoles
+        if i % 2 == 1
+            roleStr ..= "\n"..(strutils.pad role, 25)
+        else
+            roleStr ..= role
+
+    message\reply {
+        content:roleStr
+        code:true
+    }
+
+add Command "learningRoles", (message) ->
+    allRoles = {}
+    roleStr = ""
+    for role in message.guild.roles\iter!
+        roleName = words(role.name)[#(words role.name)]
+        table.insert allRoles, roleName if (words role.name)[1] == "Learning"
+    allRoles = sorted allRoles
+    for i, role in ipairs allRoles
+        if i % 2 == 1
+            roleStr ..= "\n"..(strutils.pad role, 25)
+        else
+            roleStr ..= role
+
+    message\reply {
+        content:roleStr
+        code:true
+    }
+
+add Command "whois", (message) ->
+    w = getArgs message
+    if #w < 1
+        message\reply "Usage: ;whois <tag>"
+        return
+    
+    tag = join w
+    role, err = getRoleByName message.guild, tag
+    if err == ERRORS.RoleNotFound
+        message\reply "Role #{tag} not found"
+        return false
+
+    members = {}
+    if role
+        table.insert members, member.name for member in role.members\iter!
+
+    longestWordLength = do 
+        namesByLength = sorted members, (a,b) -> #a > #b
+        #namesByLength[1]
+    
+    paddingSize = longestWordLength+4
+    finalstr = ""
+    for i, member in ipairs sorted members
+        if i%2==1
+            finalstr ..= "\n"..(strutils.pad member, paddingSize)
+        else
+            finalstr ..= member
+
+        if i == 50
+            finalstr ..= "\n"..(strutils.pad "and more...", paddingSize)
+            break
+    
+    message\reply {
+        content:finalstr
+        code:true
+    }    
